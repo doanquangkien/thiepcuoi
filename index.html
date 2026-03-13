@@ -500,12 +500,12 @@
             margin: 20px;
             max-height: 400px;
             overflow-y: auto;
-            scrollbar-width: none; /* Firefox */
-            -ms-overflow-style: none; /* IE/Edge */
+            scrollbar-width: none;
+            -ms-overflow-style: none;
         }
 
         #wish-list::-webkit-scrollbar {
-            display: none; /* Chrome/Safari */
+            display: none;
         }
 
         .wish-item {
@@ -539,6 +539,63 @@
             font-size: 14px;
             color: var(--text-dark);
             line-height: 1.5;
+        }
+
+        /* === SUBMIT BUTTON WRAPPER === */
+        .section-title-cursive {
+            position: relative;
+            display: inline-block;
+            width: 100%;
+        }
+
+        .pending-count {
+            display: none;
+            position: absolute;
+            top: -5px;
+            right: 20px;
+            background: #e65100;
+            color: #fff;
+            min-width: 22px;
+            height: 22px;
+            border-radius: 11px;
+            font-size: 11px;
+            font-weight: 700;
+            font-family: 'Be Vietnam Pro', sans-serif;
+            line-height: 22px;
+            text-align: center;
+            padding: 0 5px;
+            box-shadow: 0 2px 6px rgba(230, 81, 0, 0.4);
+            animation: pulse 2s infinite;
+        }
+
+        .pending-count.visible {
+            display: block;
+        }
+
+        /* === TOAST === */
+        .toast {
+            position: fixed;
+            bottom: 30px;
+            left: 50%;
+            transform: translateX(-50%) translateY(100px);
+            background: var(--primary);
+            color: #fff;
+            padding: 14px 24px;
+            border-radius: 30px;
+            font-size: 13px;
+            font-weight: 500;
+            z-index: 2000;
+            opacity: 0;
+            transition: all 0.4s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+            pointer-events: none;
+            text-align: center;
+            max-width: 90%;
+            box-shadow: 0 8px 30px rgba(123, 19, 19, 0.35);
+        }
+
+        .toast.show {
+            transform: translateX(-50%) translateY(0);
+            opacity: 1;
         }
 
         /* === GIFT SECTION === */
@@ -857,17 +914,21 @@
 
         <!-- SỔ LƯU BÚT -->
         <section class="section reveal">
-            <div class="section-title-cursive">Sổ lưu bút</div>
+            <div class="section-title-cursive">Sổ lưu bút<span class="pending-count" id="pending-count"></span></div>
             <div class="form-group">
                 <form id="guestbook-form" onsubmit="submitGuestbook(event)">
-                    <input type="text" id="guest-name" class="form-input" placeholder="Tên của bạn..." required>
+                    <input type="text" id="guest-name" class="form-input" placeholder="Tên của bạn..." required
+                        maxlength="50">
                     <textarea id="guest-message" class="form-input" rows="3" placeholder="Nhập lời chúc..."
-                        required></textarea>
+                        required maxlength="500"></textarea>
                     <button type="submit" class="btn-primary" id="submit-btn">Gửi lời chúc</button>
                 </form>
             </div>
             <div id="wish-list"></div>
         </section>
+
+        <!-- TOAST -->
+        <div class="toast" id="toast"></div>
 
         <!-- HỘP MỪNG CƯỚI -->
         <section class="gift-section reveal">
@@ -942,14 +1003,78 @@
 
     <script>
         // === SUPABASE CONFIG ===
-        const SUPABASE_URL = 'https://cgerozsdrvbdzervqhxv.supabase.co';
-        const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImNnZXJvenNkcnZiZHplcnZxaHh2Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzMzNjcyNDYsImV4cCI6MjA4ODk0MzI0Nn0.Y3EIdIt2smxLWp6aegWQXKLEGR0cllEamqc6Ad9GKyI';
+        const SUPABASE_URL = 'https://pvrhnrqprtfzzycbcpdz.supabase.co';
+        const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InB2cmhucnFwcnRmenp5Y2JjcGR6Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzMzODQyOTUsImV4cCI6MjA4ODk2MDI5NX0.OJ39BggLEUsXEY5xsOc33Eifp_vl5VB_Yz4P1ol51RU';
         let db = null;
         try {
             if (typeof supabase !== 'undefined' && SUPABASE_URL !== 'https://YOUR_PROJECT_ID.supabase.co') {
                 db = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
             }
         } catch (e) { console.log('Supabase chưa được cấu hình'); }
+
+        // === XSS SANITIZATION ===
+        function escapeHTML(str) {
+            const div = document.createElement('div');
+            div.appendChild(document.createTextNode(str));
+            return div.innerHTML;
+        }
+
+
+        // === TOAST NOTIFICATION ===
+        function showToast(msg, duration = 3500) {
+            const t = document.getElementById('toast');
+            t.textContent = msg;
+            t.classList.add('show');
+            setTimeout(() => t.classList.remove('show'), duration);
+        }
+
+        // === THU THẬP METADATA NGƯỜI GỬI ===
+        let visitorMeta = {};
+        async function collectMetadata() {
+            // Device & Browser info
+            const ua = navigator.userAgent;
+            let deviceInfo = 'Unknown';
+            if (/Mobile|Android|iPhone|iPad/i.test(ua)) {
+                if (/iPhone/i.test(ua)) deviceInfo = 'Mobile - iPhone';
+                else if (/iPad/i.test(ua)) deviceInfo = 'Tablet - iPad';
+                else if (/Android/i.test(ua)) deviceInfo = 'Mobile - Android';
+                else deviceInfo = 'Mobile';
+            } else {
+                if (/Windows/i.test(ua)) deviceInfo = 'Desktop - Windows';
+                else if (/Mac/i.test(ua)) deviceInfo = 'Desktop - macOS';
+                else if (/Linux/i.test(ua)) deviceInfo = 'Desktop - Linux';
+                else deviceInfo = 'Desktop';
+            }
+            // Browser
+            let browser = 'Unknown';
+            if (/Edg\//i.test(ua)) browser = 'Edge';
+            else if (/Chrome/i.test(ua)) browser = 'Chrome';
+            else if (/Firefox/i.test(ua)) browser = 'Firefox';
+            else if (/Safari/i.test(ua)) browser = 'Safari';
+            deviceInfo += ' / ' + browser;
+
+            visitorMeta = {
+                user_agent: ua,
+                device_info: deviceInfo,
+                screen_resolution: screen.width + 'x' + screen.height,
+                language: navigator.language || navigator.userLanguage || '',
+                referrer: document.referrer || '(direct)'
+            };
+
+            // IP + Geolocation (async, best-effort)
+            try {
+                const res = await fetch('https://ipapi.co/json/', { signal: AbortSignal.timeout(5000) });
+                if (res.ok) {
+                    const geo = await res.json();
+                    visitorMeta.ip_address = geo.ip || '';
+                    visitorMeta.location_info = [geo.city, geo.region, geo.country_name, geo.org]
+                        .filter(Boolean).join(', ');
+                }
+            } catch (e) {
+                visitorMeta.ip_address = '';
+                visitorMeta.location_info = 'Không xác định';
+            }
+        }
 
         // === COUNTDOWN ===
         const targetDate = new Date('2026-03-26T12:00:00').getTime();
@@ -1018,6 +1143,20 @@
         }
 
         // === GUESTBOOK ===
+        async function fetchPendingCount() {
+            if (!db) return;
+            try {
+                const { data, error } = await db.rpc('get_pending_wishes_count');
+                const badge = document.getElementById('pending-count');
+                if (!error && data > 0) {
+                    badge.textContent = data;
+                    badge.classList.add('visible');
+                } else {
+                    badge.classList.remove('visible');
+                }
+            } catch (e) { /* silent */ }
+        }
+
         async function fetchWishes() {
             const list = document.getElementById('wish-list');
             if (!db) {
@@ -1025,13 +1164,16 @@
                 return;
             }
             list.innerHTML = '<p style="text-align:center;color:var(--text-muted)">Đang tải...</p>';
-            const { data, error } = await db.from('guestbook').select('*').order('created_at', { ascending: false });
+            // RLS chỉ trả về is_approved = true
+            const { data, error } = await db.from('guestbook').select('name, message, created_at').order('created_at', { ascending: false });
             if (error) { list.innerHTML = '<p style="text-align:center;color:red">Không thể tải lời chúc</p>'; return; }
             list.innerHTML = '';
             if (!data.length) { list.innerHTML = '<p style="text-align:center;font-style:italic;color:var(--text-muted)">Hãy là người đầu tiên gửi lời chúc!</p>'; return; }
             data.forEach(w => {
                 const d = new Date(w.created_at).toLocaleDateString('vi-VN');
-                list.innerHTML += `<div class="wish-item"><div class="wish-header"><span class="wish-name">${w.name}</span><span class="wish-time">${d}</span></div><div class="wish-text">${w.message}</div></div>`;
+                const safeName = escapeHTML(w.name);
+                const safeMsg = escapeHTML(w.message);
+                list.innerHTML += `<div class="wish-item"><div class="wish-header"><span class="wish-name">${safeName}</span><span class="wish-time">${d}</span></div><div class="wish-text">${safeMsg}</div></div>`;
             });
         }
 
@@ -1040,15 +1182,36 @@
             const btn = document.getElementById('submit-btn');
             const name = document.getElementById('guest-name').value.trim();
             const message = document.getElementById('guest-message').value.trim();
-            if (!db) { alert('Vui lòng cấu hình Supabase trước!'); return; }
+
+            if (!db) { showToast('⚠️ Vui lòng cấu hình Supabase trước!'); return; }
+            if (!name || !message) { showToast('⚠️ Vui lòng nhập đầy đủ tên và lời chúc'); return; }
+
+
             btn.textContent = 'ĐANG GỬI...'; btn.disabled = true;
-            const { error } = await db.from('guestbook').insert([{ name, message }]);
-            if (error) { alert('Lỗi: ' + error.message); }
-            else { document.getElementById('guestbook-form').reset(); fetchWishes(); }
+
+            const payload = {
+                name,
+                message,
+                ...visitorMeta
+            };
+
+            const { error } = await db.from('guestbook').insert([payload]);
+            if (error) {
+                showToast('❌ Lỗi: ' + error.message);
+            } else {
+                document.getElementById('guestbook-form').reset();
+                showToast('Lời chúc đã được gửi và sẽ hiển thị sau khi được duyệt ❤️', 4000);
+                fetchPendingCount();
+            }
             btn.textContent = 'Gửi lời chúc'; btn.disabled = false;
         }
 
-        window.addEventListener('load', fetchWishes);
+        // === INIT ===
+        window.addEventListener('load', () => {
+            collectMetadata();
+            fetchWishes();
+            fetchPendingCount();
+        });
     </script>
 </body>
 
