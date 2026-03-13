@@ -11,7 +11,8 @@
     <meta property="og:type" content="website">
     <meta property="og:url" content="https://thiepmoi.sirimi.com/">
     <meta property="og:title" content="💒 Thiệp Cưới Quang Kiên & Anh Thư — 26/03/2026">
-    <meta property="og:description" content="Trân trọng kính mời Quý khách đến dự lễ cưới của Đoàn Quang Kiên & Ngô Bảo Thị Anh Thư vào ngày 26/03/2026 tại Thôn Chánh Liêm, Xã Xuân An, Tỉnh Gia Lai.">
+    <meta property="og:description"
+        content="Trân trọng kính mời Quý khách đến dự lễ cưới của Đoàn Quang Kiên & Ngô Bảo Thị Anh Thư vào ngày 26/03/2026 tại Thôn Chánh Liêm, Xã Xuân An, Tỉnh Gia Lai.">
     <meta property="og:image" content="https://lh3.googleusercontent.com/d/1UU37UUw8mIIPKrBmXTQFlmBvwe3wL3E8">
     <meta property="og:image:width" content="1200">
     <meta property="og:image:height" content="630">
@@ -20,7 +21,8 @@
     <!-- Twitter Card -->
     <meta name="twitter:card" content="summary_large_image">
     <meta name="twitter:title" content="💒 Thiệp Cưới Quang Kiên & Anh Thư — 26/03/2026">
-    <meta name="twitter:description" content="Trân trọng kính mời Quý khách đến dự lễ cưới của Đoàn Quang Kiên & Ngô Bảo Thị Anh Thư vào ngày 26/03/2026.">
+    <meta name="twitter:description"
+        content="Trân trọng kính mời Quý khách đến dự lễ cưới của Đoàn Quang Kiên & Ngô Bảo Thị Anh Thư vào ngày 26/03/2026.">
     <meta name="twitter:image" content="https://lh3.googleusercontent.com/d/1UU37UUw8mIIPKrBmXTQFlmBvwe3wL3E8">
 
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
@@ -498,6 +500,12 @@
             margin: 20px;
             max-height: 400px;
             overflow-y: auto;
+            scrollbar-width: none; /* Firefox */
+            -ms-overflow-style: none; /* IE/Edge */
+        }
+
+        #wish-list::-webkit-scrollbar {
+            display: none; /* Chrome/Safari */
         }
 
         .wish-item {
@@ -734,12 +742,16 @@
             <div class="parents-grid">
                 <div class="parent-card">
                     <strong>Nhà Trai</strong>
-                    <p><span style="white-space:nowrap">Ông: Đoàn Văn Khanh</span><br><span style="white-space:nowrap">Bà: Trần Thị Thu Thủy</span><br><small style="color:var(--text-muted)">Thôn Chánh
+                    <p><span style="white-space:nowrap">Ông: Đoàn Văn Khanh</span><br><span
+                            style="white-space:nowrap">Bà: Trần Thị Thu Thủy</span><br><small
+                            style="color:var(--text-muted)">Thôn Chánh
                             Liêm, Xã Xuân An, Tỉnh Gia Lai</small></p>
                 </div>
                 <div class="parent-card">
                     <strong>Nhà Gái</strong>
-                    <p><span style="white-space:nowrap">Ông: Ngô Văn Thắng</span><br><span style="white-space:nowrap">Bà: Nguyễn Thị Thu Nga</span><br><small style="color:var(--text-muted)">180/8/15
+                    <p><span style="white-space:nowrap">Ông: Ngô Văn Thắng</span><br><span
+                            style="white-space:nowrap">Bà: Nguyễn Thị Thu Nga</span><br><small
+                            style="color:var(--text-muted)">180/8/15
                             Lạc Long Quân, Tổ 4 - KV 13, P. Quy Nhơn Bắc, Tỉnh Gia Lai</small></p>
                 </div>
             </div>
