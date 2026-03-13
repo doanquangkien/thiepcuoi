@@ -96,8 +96,8 @@
             gap: 15px; text-align: center; margin: 0 10px 20px;
         }
         .parent-card {
-            padding: 15px 10px; background: rgba(255,255,255,0.5);
-            border-radius: 12px; border: 1px solid rgba(123,19,19,0.1);
+            padding: 15px 10px; background: transparent;
+            border-radius: 12px; border: none;
         }
         .parent-card strong { color: var(--primary); font-size: 14px; display: block; margin-bottom: 8px; letter-spacing: 1px; }
         .parent-card p { font-size: 13px; color: var(--text-dark); line-height: 1.6; margin: 0; }
@@ -306,7 +306,7 @@
                 <path d="M95 60 Q80 80, 75 100 Q73 110, 82 112 Q88 108, 92 95 Q96 80, 95 60Z" fill="var(--primary)" opacity="0.35"/>
             </svg>
         </div>
-        <div class="names-display">Quang Kiên<br>&amp;<br>Anh Thư</div>
+        <div class="names-display">Quang Kiên<br>&amp;<br><span style="font-size: 1.05em">A</span>nh <span style="font-size: 1.05em">T</span>hư</div>
     </section>
 
     <!-- THÔNG TIN LỄ CƯỚI -->
@@ -442,14 +442,11 @@
         <button class="modal-close" onclick="closeGiftModal()">&times;</button>
         <h3>Mừng Cưới</h3>
         <p style="font-size:13px; color: var(--text-muted);">Quý khách có thể gửi quà mừng qua tài khoản ngân hàng</p>
-        <div class="qr-placeholder">
-            <span>QR Code<br>Ngân hàng</span>
-        </div>
+        <img src="https://img.vietqr.io/image/TCB-19030858434030-compact.png" alt="QR Chuyển khoản" style="width: 220px; height: auto; margin: 15px auto; display: block; border-radius: 10px;">
         <div class="bank-info">
-            <strong>ĐOÀN QUANG KIÊN</strong><br>
-            Số TK: 1234 5678 9000<br>
-            Ngân hàng: Vietcombank<br>
-            Chi nhánh: TP.HCM
+            <strong>DOAN QUANG KIEN</strong><br>
+            Số TK: 19030858434030<br>
+            Ngân hàng: Techcombank
         </div>
     </div>
 </div>
